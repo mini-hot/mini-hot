@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/mini-hot/mini-hot/issues"
   },
-  "homepage": "https://github.com/mini-hot/mini-hot#readme"
+  "homepage": "https://github.com/mini-hot/mini-hot#readme",
+  "devDependencies": {
+    "@tarojs/taro": "^3.4.2",
+    "@types/react": "^17.0.39",
+    "lerna": "^4.0.0",
+    "react": "^17.0.2"
+  }
 }
