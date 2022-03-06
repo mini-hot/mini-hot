@@ -6,7 +6,7 @@ import Taro from '@tarojs/taro'
 type OriginCreateRemotePageOptions = {
     getPage: () => Promise<ElementType>
     onFinish?: () => void
-    onLoading?: (reload: () => void) => ElementType
+    onLoading?: () => ElementType
     onError?: (reload: () => void) => ElementType
     preFetch?: boolean
 }
@@ -30,7 +30,7 @@ export function createRemotePage(options: CreateRemotePageOptions) {
     return class RemotePageWrapper extends Component {
         constructor(props: any) {
             super(props)
-            if (!opts.preFetch) {
+            if (getPagePromise === undefined) {
                 getPagePromise = makeQueryablePromise(opts.getPage())
             } else if (getPagePromise?.isRejected()) {
                 // 重试
@@ -48,7 +48,7 @@ export function createRemotePage(options: CreateRemotePageOptions) {
         }
 
         load = () => {
-            const LoadingCom = opts?.onLoading?.(this.reload)
+            const LoadingCom = opts?.onLoading?.()
 
             this.setState({
                 status: 'loading',
@@ -56,7 +56,7 @@ export function createRemotePage(options: CreateRemotePageOptions) {
             })
 
             getPagePromise?.then(
-                (RemotePage) => {
+                RemotePage => {
                     this.setState({
                         RemotePage,
                         status: 'resolved',
@@ -96,7 +96,7 @@ export function createRemotePage(options: CreateRemotePageOptions) {
             ref?.['componentDidShow']?.()
 
             // 页面事件透传
-            taroPageLifecycleNames.forEach((name) => {
+            taroPageLifecycleNames.forEach(name => {
                 // 如果未设置分享，则取消分享
                 if (!ref?.['onShareAppMessage']) {
                     Taro.hideShareMenu()
