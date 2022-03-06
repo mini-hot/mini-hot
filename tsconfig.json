@@ -9,6 +9,7 @@
     "jsx": "react",
     "declaration": true,
     "declarationDir": "./types",
+    "strictNullChecks": true,
     "sourceMap": true,
     "removeComments": false,
     "noUnusedLocals": true,

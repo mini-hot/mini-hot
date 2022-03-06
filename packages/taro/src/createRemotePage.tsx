@@ -21,18 +21,18 @@ export function createRemotePage(options: CreateRemotePageOptions) {
             : (options as OriginCreateRemotePageOptions)),
     }
 
-    let getPagePromise: Promise<ElementType> & QueryableProps = undefined
+    let getPagePromise: (Promise<ElementType> & QueryableProps) | undefined = undefined
 
     if (opts.preFetch) {
         getPagePromise = makeQueryablePromise(opts.getPage())
     }
 
-    return class extends Component {
+    return class RemotePageWrapper extends Component {
         constructor(props: any) {
             super(props)
             if (!opts.preFetch) {
                 getPagePromise = makeQueryablePromise(opts.getPage())
-            } else if (getPagePromise.isRejected) {
+            } else if (getPagePromise?.isRejected()) {
                 // 重试
                 getPagePromise = makeQueryablePromise(opts.getPage())
             }
@@ -42,14 +42,14 @@ export function createRemotePage(options: CreateRemotePageOptions) {
 
         load = () => {
             getPagePromise = makeQueryablePromise(opts.getPage())
-            const LoadingCom = opts?.onLoading(this.load)
+            const LoadingCom = opts?.onLoading?.(this.load)
             this.setState(
                 {
                     status: 'loading',
                     LoadingCom: LoadingCom || null,
                 },
                 () => {
-                    getPagePromise.then(
+                    getPagePromise?.then(
                         (RemotePage) => {
                             this.setState({
                                 RemotePage,
