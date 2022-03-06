@@ -11,7 +11,7 @@ type OriginCreateRemotePageOptions = {
     preFetch?: boolean
 }
 
-export type CreateRemotePageOptions = () => Promise<ElementType> | OriginCreateRemotePageOptions
+export type CreateRemotePageOptions = (() => Promise<ElementType>) | OriginCreateRemotePageOptions
 
 export function createRemotePage(options: CreateRemotePageOptions) {
     const opts: OriginCreateRemotePageOptions = {
@@ -36,35 +36,39 @@ export function createRemotePage(options: CreateRemotePageOptions) {
                 // 重试
                 getPagePromise = makeQueryablePromise(opts.getPage())
             }
+        }
 
+        reload = () => {
+            getPagePromise = makeQueryablePromise(opts.getPage())
+            this.load()
+        }
+
+        componentDidMount = () => {
             this.load()
         }
 
         load = () => {
-            getPagePromise = makeQueryablePromise(opts.getPage())
-            const LoadingCom = opts?.onLoading?.(this.load)
-            this.setState(
-                {
-                    status: 'loading',
-                    LoadingCom: LoadingCom || null,
+            const LoadingCom = opts?.onLoading?.(this.reload)
+
+            this.setState({
+                status: 'loading',
+                LoadingCom: LoadingCom || null,
+            })
+
+            getPagePromise?.then(
+                (RemotePage) => {
+                    this.setState({
+                        RemotePage,
+                        status: 'resolved',
+                    })
+                    opts.onFinish?.()
                 },
                 () => {
-                    getPagePromise?.then(
-                        (RemotePage) => {
-                            this.setState({
-                                RemotePage,
-                                status: 'resolved',
-                            })
-                            opts.onFinish?.()
-                        },
-                        () => {
-                            const ErrorComp = opts.onError?.(this.load)
-                            this.setState({
-                                status: 'rejected',
-                                ErrorComp: ErrorComp || null,
-                            })
-                        }
-                    )
+                    const ErrorComp = opts.onError?.(this.reload)
+                    this.setState({
+                        status: 'rejected',
+                        ErrorComp: ErrorComp || null,
+                    })
                 }
             )
         }
@@ -114,11 +118,14 @@ export function createRemotePage(options: CreateRemotePageOptions) {
                 return (
                     <RemotePage
                         ref={(ref: Ref<ElementType>) => {
-                            this.handleTaroPageLifecycle(ref)
+                            Taro.nextTick(() => {
+                                this.handleTaroPageLifecycle(ref)
+                            })
                         }}
                     ></RemotePage>
                 )
             }
+
             if (status === 'loading' && LoadingCom) {
                 return <LoadingCom />
             }
