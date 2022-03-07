@@ -1,7 +1,11 @@
 'use strict';
 
-const cli = require('..');
+// const cli = require('..');
 
 describe('@mini-hot/cli', () => {
-    it('needs tests');
+    // it('needs tests');
+    test('todo', () => {
+
+    })
 });
+

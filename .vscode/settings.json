@@ -1,3 +1,6 @@
 {
-    "svg.preview.background": "white"
+    "svg.preview.background": "white",
+    "cSpell.words": [
+        "tarojs"
+    ]
 }
