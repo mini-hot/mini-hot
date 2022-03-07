@@ -9,9 +9,21 @@ type OriginCreateRemotePageOptions = {
     onLoading?: () => ElementType
     onError?: (reload: () => void) => ElementType
     preFetch?: boolean
+    timeout?: number
 }
 
 export type CreateRemotePageOptions = (() => Promise<{ default: ElementType }>) | OriginCreateRemotePageOptions
+
+function createPromise<T>(promise: Promise<T>, timeout: number = 0) {
+    let resPromise = promise
+    if (timeout > 0) {
+        const timeoutPromise = new Promise<any>((_resolve, reject) =>
+            setTimeout(() => reject(`加载远程组件超时，当前设置的超时时间为「${timeout} ms」`), timeout)
+        )
+        resPromise = Promise.race([promise, timeoutPromise])
+    }
+    return makeQueryablePromise(resPromise)
+}
 
 export function createRemotePage(options: CreateRemotePageOptions) {
     const opts: OriginCreateRemotePageOptions = {
@@ -24,22 +36,22 @@ export function createRemotePage(options: CreateRemotePageOptions) {
     let getPagePromise: (Promise<{ default: ElementType }> & QueryableProps) | undefined = undefined
 
     if (opts.preFetch) {
-        getPagePromise = makeQueryablePromise(opts.getPage())
+        getPagePromise = createPromise(opts.getPage(), opts.timeout)
     }
 
     return class RemotePageWrapper extends Component {
         constructor(props: any) {
             super(props)
             if (getPagePromise === undefined) {
-                getPagePromise = makeQueryablePromise(opts.getPage())
+                getPagePromise = createPromise(opts.getPage(), opts.timeout)
             } else if (getPagePromise?.isRejected()) {
                 // 重试
-                getPagePromise = makeQueryablePromise(opts.getPage())
+                getPagePromise = createPromise(opts.getPage(), opts.timeout)
             }
         }
 
         reload = () => {
-            getPagePromise = makeQueryablePromise(opts.getPage())
+            getPagePromise = createPromise(opts.getPage(), opts.timeout)
             this.load()
         }
 
