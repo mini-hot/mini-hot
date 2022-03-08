@@ -1,6 +1,6 @@
 {
   "name": "@mini-hot/taro",
-  "version": "0.0.1-beta.0",
+  "version": "0.0.1-beta.1",
   "description": "> TODO: description",
   "author": "wuchangming <wuchangmingnice@163.com>",
   "homepage": "https://github.com/mini-hot/mini-hot/tree/main/packages/taro#readme",
@@ -40,5 +40,6 @@
   "peerDependencies": {
     "@tarojs/taro": "3.x",
     "react": "*"
-  }
+  },
+  "gitHead": "a40ad7c59db5daf69057782c2be5636aa20980e7"
 }
