@@ -1,6 +1,6 @@
 {
   "name": "@mini-hot/cli",
-  "version": "0.0.0",
+  "version": "0.0.1-beta.0",
   "description": "> TODO: description",
   "author": "wuchangming <wuchangmingnice@163.com>",
   "homepage": "https://github.com/mini-hot/mini-hot/tree/main/packages/cli#readme",
@@ -20,7 +20,8 @@
     "url": "git+https://github.com/mini-hot/mini-hot.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": ""
   },
   "bugs": {
     "url": "https://github.com/mini-hot/mini-hot/issues"

@@ -1,17 +1,24 @@
 {
   "name": "@mini-hot/taro",
-  "version": "0.0.0",
+  "version": "0.0.1-beta.0",
   "description": "> TODO: description",
   "author": "wuchangming <wuchangmingnice@163.com>",
   "homepage": "https://github.com/mini-hot/mini-hot/tree/main/packages/taro#readme",
   "license": "MIT",
-  "main": "lib/taro.js",
+  "main": "lib/mini-hot-taro.js",
+  "unpkg": "dist/mini-hot-taro.js",
+  "module": "es/mini-hot-taro.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "dist",
+    "lib",
+    "es",
+    "src",
+    "types"
+  ],
   "directories": {
     "lib": "lib"
   },
-  "files": [
-    "lib"
-  ],
   "publishConfig": {
     "access": "public"
   },
@@ -20,9 +27,18 @@
     "url": "git+https://github.com/mini-hot/mini-hot.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "clean": "rimraf dist es lib types",
+    "build": "npm run clean && rollup -c"
   },
   "bugs": {
     "url": "https://github.com/mini-hot/mini-hot/issues"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.17.2"
+  },
+  "peerDependencies": {
+    "@tarojs/taro": "3.x",
+    "react": "*"
   }
 }
