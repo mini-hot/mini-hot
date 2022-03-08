@@ -1,8 +1,8 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "outDir": "./lib",
-        "declarationDir": "lib/types", /* Output directory for generated declaration files. */
+        "baseUrl": "./",
+        "declarationDir": "./types",
         "declaration": true /* Generates corresponding '.d.ts' file. */
     },
     "include": ["./src"]
