@@ -67,22 +67,22 @@ export function createRemoteApp(
             getRoutesPromise?.then(
                 ({ default: routes }) => {
                     const originParams = this.$instance.router?.params || {}
-                    const originPath = originParams[opts.routePathKey || ROUTE_PATH_KEY] || ''
+                    const originPath = decodeURIComponent(originParams[opts.routePathKey || ROUTE_PATH_KEY] || '')
 
-                    const { path, query = {} } = getPathAndQuery(decodeURIComponent(originPath))
+                    const { path, query = {} } = getPathAndQuery(originPath)
 
                     let RemotePage: ElementType | null = null
 
                     const [route, params] = matchRoute(routes, path)
 
                     if (route) {
-                        const { getPage, path } = route
+                        const { getPage } = route
                         getPage().then(
                             ({ default: RemotePage }) => {
                                 this.setState({
                                     RemotePage,
                                     status: 'resolved',
-                                    routerInfo: { query, params, path },
+                                    routerInfo: { query, params, path: originPath },
                                 })
                                 opts.onFinish?.()
                             },
