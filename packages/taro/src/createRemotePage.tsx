@@ -1,10 +1,10 @@
 import React, { Component, ElementType, Ref } from 'react'
-import { makeQueryablePromise, QueryableProps } from './utils/makeQueryablePromise'
+import { QueryableProps } from './utils/makeQueryablePromise'
 import { taroPageLifecycleNames } from './utils/taroPageLifecycleNames'
 import Taro from '@tarojs/taro'
+import { createPromise } from './utils/createPromise'
 
-type OriginCreateRemotePageOptions = {
-    getPage: () => Promise<{ default: ElementType }>
+type CreateRemotePageOptions = {
     onFinish?: () => void
     onLoading?: () => ElementType
     onError?: (reload: () => void) => ElementType
@@ -12,46 +12,31 @@ type OriginCreateRemotePageOptions = {
     timeout?: number
 }
 
-export type CreateRemotePageOptions = (() => Promise<{ default: ElementType }>) | OriginCreateRemotePageOptions
-
-function createPromise<T>(promise: Promise<T>, timeout: number = 0) {
-    let resPromise = promise
-    if (timeout > 0) {
-        const timeoutPromise = new Promise<any>((_resolve, reject) =>
-            setTimeout(() => reject(`加载远程组件超时，当前设置的超时时间为「${timeout} ms」`), timeout)
-        )
-        resPromise = Promise.race([promise, timeoutPromise])
-    }
-    return makeQueryablePromise(resPromise)
-}
-
-export function createRemotePage(options: CreateRemotePageOptions) {
-    const opts: OriginCreateRemotePageOptions = {
+export function createRemotePage(getPage: () => Promise<{ default: ElementType }>, options?: CreateRemotePageOptions) {
+    const opts: CreateRemotePageOptions = {
         preFetch: true,
-        ...(typeof options === 'function'
-            ? { getPage: options as () => Promise<{ default: ElementType }> }
-            : (options as OriginCreateRemotePageOptions)),
+        ...options,
     }
 
     let getPagePromise: (Promise<{ default: ElementType }> & QueryableProps) | undefined = undefined
 
     if (opts.preFetch) {
-        getPagePromise = createPromise(opts.getPage(), opts.timeout)
+        getPagePromise = createPromise(getPage(), opts.timeout)
     }
 
     return class RemotePageWrapper extends Component {
         constructor(props: any) {
             super(props)
             if (getPagePromise === undefined) {
-                getPagePromise = createPromise(opts.getPage(), opts.timeout)
+                getPagePromise = createPromise(getPage(), opts.timeout)
             } else if (getPagePromise?.isRejected()) {
                 // 重试
-                getPagePromise = createPromise(opts.getPage(), opts.timeout)
+                getPagePromise = createPromise(getPage(), opts.timeout)
             }
         }
 
         reload = () => {
-            getPagePromise = createPromise(opts.getPage(), opts.timeout)
+            getPagePromise = createPromise(getPage(), opts.timeout)
             this.load()
         }
 

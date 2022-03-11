@@ -35,7 +35,8 @@
     "url": "https://github.com/mini-hot/mini-hot/issues"
   },
   "dependencies": {
-    "@babel/runtime": "^7.17.2"
+    "@babel/runtime": "^7.17.2",
+    "path-to-regexp": "^6.2.0"
   },
   "peerDependencies": {
     "@tarojs/taro": "3.x",

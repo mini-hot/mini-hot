@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "lerna run test"
+    "test": "lerna run test",
+    "build": "lerna run build"
   },
   "repository": {
     "type": "git",
