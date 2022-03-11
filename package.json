@@ -6,8 +6,8 @@
   "scripts": {
     "test": "lerna run test",
     "build": "lerna run build",
-    "release:beta": "lerna publish --force-publish=* --exact --preid=beta --dist-tag=beta",
-    "release": "lerna publish --force-publish=* --exact"
+    "release:beta": "npm run build && lerna publish --force-publish=* --exact --preid=beta --dist-tag=beta",
+    "release": "npm run build && lerna publish --force-publish=* --exact"
   },
   "repository": {
     "type": "git",
