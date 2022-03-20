@@ -16,13 +16,16 @@ export default createRemotePage(() => import('./SomePage'))
 ```ts
 // routes.ts
 import { createRemoteAppRoutes } from '@mini-hot/taro'
+
 export default createRemoteAppRoutes([
     {
         path: '/PageA/:code',
-        getPage: () => import('./PageA'),
+        // PageA 不再分块
+        getPage: async () => require('./PageA'),
     },
     {
         path: '/PageB',
+        // PageB 继续分块
         getPage: () => import('./PageB'),
     },
 ])
