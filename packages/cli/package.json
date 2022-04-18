@@ -25,5 +25,11 @@
   },
   "bugs": {
     "url": "https://github.com/mini-hot/mini-hot/issues"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "finalhandler": "^1.2.0",
+    "get-port": "5.1.1",
+    "serve-static": "^1.15.0"
   }
 }
