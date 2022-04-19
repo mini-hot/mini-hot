@@ -15,12 +15,12 @@ class MiniRemoteChunkPlugin extends SplitChunksPlugin_1.default {
     splitChunkNames = [];
     options = null;
     publicPath = '';
-    remoteChunkOutputPath = '';
+    hotUpdateAssetsOutputPath = '';
     entryChunkUseCache = false;
     constructor(o) {
         super(o);
         this.publicPath = (0, helper_1.normalizePublicPath)(o.publicPath);
-        this.remoteChunkOutputPath = (0, helper_1.normalizePublicPath)(o.remoteChunkOutputPath);
+        this.hotUpdateAssetsOutputPath = (0, helper_1.normalizePublicPath)(o.hotUpdateAssetsOutputPath);
         this.entryChunkUseCache = o.entryChunkUseCache;
     }
     apply(compiler) {
@@ -82,7 +82,7 @@ class MiniRemoteChunkPlugin extends SplitChunksPlugin_1.default {
     getChunkName = (moduleId) => {
         const isEntryModule = this.isEntryDynamicModule(moduleId);
         const { filename, hash } = this.moduleBuildInfoMap.get(moduleId);
-        return `${this.remoteChunkOutputPath}/${filename}${isEntryModule ? '' : '_' + hash}`;
+        return `${this.hotUpdateAssetsOutputPath}/${filename}${isEntryModule ? '' : '_' + hash}`;
     };
     stableChunkId = (chunks) => {
         chunks.forEach((chunk) => {

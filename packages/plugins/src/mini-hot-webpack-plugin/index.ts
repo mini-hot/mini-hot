@@ -17,13 +17,13 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     splitChunkNames: string[] = []
     options = null
     publicPath = ''
-    remoteChunkOutputPath = ''
+    hotUpdateAssetsOutputPath = ''
     entryChunkUseCache = false
 
     constructor(o) {
         super(o)
         this.publicPath = normalizePublicPath(o.publicPath)
-        this.remoteChunkOutputPath = normalizePublicPath(o.remoteChunkOutputPath)
+        this.hotUpdateAssetsOutputPath = normalizePublicPath(o.hotUpdateAssetsOutputPath)
         this.entryChunkUseCache = o.entryChunkUseCache
     }
 
@@ -91,7 +91,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     getChunkName = (moduleId) => {
         const isEntryModule = this.isEntryDynamicModule(moduleId)
         const { filename, hash } = this.moduleBuildInfoMap.get(moduleId)
-        return `${this.remoteChunkOutputPath}/${filename}${isEntryModule ? '' : '_' + hash}`
+        return `${this.hotUpdateAssetsOutputPath}/${filename}${isEntryModule ? '' : '_' + hash}`
     }
 
     stableChunkId = (chunks) => {

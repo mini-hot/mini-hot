@@ -3,8 +3,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const webpack_mini_remote_chunk_plugin_1 = __importDefault(require("../webpack-mini-remote-chunk-plugin"));
-const getDirectoryHash_1 = require("../../helper/getDirectoryHash");
+const mini_hot_webpack_plugin_1 = __importDefault(require("../mini-hot-webpack-plugin"));
+const getDirectoryHash_1 = require("../helper/getDirectoryHash");
 const getPort = require('get-port');
 const path = require('path');
 const http = require('http');
@@ -16,7 +16,7 @@ exports.default = async (ctx, pluginOpts) => {
     const { runOpts, paths } = ctx;
     if (runOpts.options.platform !== 'weapp')
         return;
-    const { publicPath, remoteChunkOutputPath, entryChunkUseCache, devServerPort = 9090 } = pluginOpts;
+    const { publicPath, hotUpdateAssetsOutputPath, entryChunkUseCache, devServerPort = 9090 } = pluginOpts;
     const serverPort = await getPort({ port: devServerPort });
     async function createServer() {
         try {
@@ -39,7 +39,7 @@ exports.default = async (ctx, pluginOpts) => {
     function normalizeOptions() {
         return {
             publicPath: runOpts.options.isWatch ? `http://127.0.0.1:${serverPort}` : publicPath,
-            remoteChunkOutputPath,
+            hotUpdateAssetsOutputPath,
             entryChunkUseCache,
         };
     }
@@ -49,15 +49,15 @@ exports.default = async (ctx, pluginOpts) => {
         }
     });
     ctx.modifyWebpackChain(({ chain }) => {
-        chain.plugin('mini-remote-plugin').use(webpack_mini_remote_chunk_plugin_1.default, [normalizeOptions()]).end();
+        chain.plugin('mini-remote-plugin').use(mini_hot_webpack_plugin_1.default, [normalizeOptions()]).end();
     });
     ctx.onBuildFinish(() => {
         if (!runOpts.options.isWatch) {
-            const remoteAbsolutePath = path.join(paths.outputPath, remoteChunkOutputPath);
+            const remoteAbsolutePath = path.join(paths.outputPath, hotUpdateAssetsOutputPath);
             const basicHash = (0, getDirectoryHash_1.getDirectoryHash)(paths.outputPath, remoteAbsolutePath);
-            const remotehash = (0, getDirectoryHash_1.getDirectoryHash)(remoteAbsolutePath);
+            const remoteHash = (0, getDirectoryHash_1.getDirectoryHash)(remoteAbsolutePath);
             console.log(colors.green(`\n💟 无法热更新内容hash: ${basicHash} \n`));
-            console.log(colors.green(`\n💓 支持热更新内容hash: ${remotehash} \n`));
+            console.log(colors.green(`\n💓 支持热更新内容hash: ${remoteHash} \n`));
         }
     });
 };

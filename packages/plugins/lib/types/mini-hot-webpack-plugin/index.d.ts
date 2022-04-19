@@ -9,7 +9,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     splitChunkNames: string[];
     options: null;
     publicPath: string;
-    remoteChunkOutputPath: string;
+    hotUpdateAssetsOutputPath: string;
     entryChunkUseCache: boolean;
     constructor(o: any);
     apply(compiler: any): void;
