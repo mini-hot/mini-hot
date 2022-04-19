@@ -1,45 +1,42 @@
 import React, { Component, ElementType, Ref } from 'react'
-import { makeQueryablePromise, QueryableProps } from './utils/makeQueryablePromise'
+import { QueryableProps } from './utils/makeQueryablePromise'
 import { taroPageLifecycleNames } from './utils/taroPageLifecycleNames'
 import Taro from '@tarojs/taro'
+import { createPromise } from './utils/createPromise'
 
-type OriginCreateRemotePageOptions = {
-    getPage: () => Promise<ElementType>
+type CreateRemotePageOptions = {
     onFinish?: () => void
     onLoading?: () => ElementType
     onError?: (reload: () => void) => ElementType
     preFetch?: boolean
+    timeout?: number
 }
 
-export type CreateRemotePageOptions = (() => Promise<ElementType>) | OriginCreateRemotePageOptions
-
-export function createRemotePage(options: CreateRemotePageOptions) {
-    const opts: OriginCreateRemotePageOptions = {
+export function createRemotePage(getPage: () => Promise<{ default: ElementType }>, options?: CreateRemotePageOptions) {
+    const opts: CreateRemotePageOptions = {
         preFetch: true,
-        ...(typeof options === 'function'
-            ? { getPage: options as () => Promise<ElementType> }
-            : (options as OriginCreateRemotePageOptions)),
+        ...options,
     }
 
-    let getPagePromise: (Promise<ElementType> & QueryableProps) | undefined = undefined
+    let getPagePromise: (Promise<{ default: ElementType }> & QueryableProps) | undefined = undefined
 
     if (opts.preFetch) {
-        getPagePromise = makeQueryablePromise(opts.getPage())
+        getPagePromise = createPromise(getPage(), opts.timeout)
     }
 
     return class RemotePageWrapper extends Component {
         constructor(props: any) {
             super(props)
             if (getPagePromise === undefined) {
-                getPagePromise = makeQueryablePromise(opts.getPage())
+                getPagePromise = createPromise(getPage(), opts.timeout)
             } else if (getPagePromise?.isRejected()) {
                 // 重试
-                getPagePromise = makeQueryablePromise(opts.getPage())
+                getPagePromise = createPromise(getPage(), opts.timeout)
             }
         }
 
         reload = () => {
-            getPagePromise = makeQueryablePromise(opts.getPage())
+            getPagePromise = createPromise(getPage(), opts.timeout)
             this.load()
         }
 
@@ -56,7 +53,7 @@ export function createRemotePage(options: CreateRemotePageOptions) {
             })
 
             getPagePromise?.then(
-                RemotePage => {
+                ({ default: RemotePage }) => {
                     this.setState({
                         RemotePage,
                         status: 'resolved',
@@ -96,7 +93,7 @@ export function createRemotePage(options: CreateRemotePageOptions) {
             ref?.['componentDidShow']?.()
 
             // 页面事件透传
-            taroPageLifecycleNames.forEach(name => {
+            taroPageLifecycleNames.forEach((name) => {
                 // 如果未设置分享，则取消分享
                 if (!ref?.['onShareAppMessage']) {
                     Taro.hideShareMenu()

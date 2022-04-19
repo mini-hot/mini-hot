@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "lerna run test",
+    "build": "lerna run build",
+    "release:beta": "npm run build && lerna publish --force-publish=* --exact --preid=beta --dist-tag=beta",
+    "release": "npm run build && lerna publish --force-publish=* --exact"
   },
   "repository": {
     "type": "git",
@@ -18,9 +21,12 @@
   "homepage": "https://github.com/mini-hot/mini-hot#readme",
   "devDependencies": {
     "@tarojs/taro": "^3.4.2",
+    "@types/jest": "^27.4.1",
     "@types/react": "^17.0.39",
+    "jest": "^27.5.1",
     "lerna": "^4.0.0",
     "react": "^17.0.2",
+    "ts-jest": "^27.1.3",
     "typescript": "^4.6.2"
   }
 }
