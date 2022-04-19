@@ -1,5 +1,5 @@
 import { IPluginContext } from '@tarojs/service';
-declare type PluginOptions = {
+export declare type PluginOptions = {
     publicPath: string;
     remoteChunkOutputPath: string;
     entryChunkUseCache: boolean | ((url: string) => string);

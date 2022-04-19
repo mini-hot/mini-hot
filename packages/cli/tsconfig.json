@@ -3,6 +3,7 @@
   "compilerOptions": {
       "outDir": "./lib",
       "sourceMap": false,
+      "module": "commonjs",
       "declarationDir": "lib/types", /* Output directory for generated declaration files. */
       "declaration": true /* Generates corresponding '.d.ts' file. */
   },

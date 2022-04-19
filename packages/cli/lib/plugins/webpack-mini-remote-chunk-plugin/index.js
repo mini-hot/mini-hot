@@ -1,9 +1,14 @@
-import SplitChunksPlugin from 'webpack/lib/optimize/SplitChunksPlugin';
-import { Template } from 'webpack';
-import { isDynamicDep, getModuleId, normalizePublicPath } from './helper';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const SplitChunksPlugin_1 = __importDefault(require("webpack/lib/optimize/SplitChunksPlugin"));
+const webpack_1 = require("webpack");
+const helper_1 = require("./helper");
 const path = require('path');
 const PLUGIN_NAME = 'miniRemoteChunkPlugin';
-export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
+class MiniRemoteChunkPlugin extends SplitChunksPlugin_1.default {
     dynamicModules = new Set();
     moduleBuildInfoMap = new Map();
     dynamicModuleReasonMap = new Map();
@@ -14,8 +19,8 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     entryChunkUseCache = false;
     constructor(o) {
         super(o);
-        this.publicPath = normalizePublicPath(o.publicPath);
-        this.remoteChunkOutputPath = normalizePublicPath(o.remoteChunkOutputPath);
+        this.publicPath = (0, helper_1.normalizePublicPath)(o.publicPath);
+        this.remoteChunkOutputPath = (0, helper_1.normalizePublicPath)(o.remoteChunkOutputPath);
         this.entryChunkUseCache = o.entryChunkUseCache;
     }
     apply(compiler) {
@@ -25,7 +30,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
             compilation.hooks.optimizeChunks.tap(PLUGIN_NAME, (chunks) => {
                 let _options = compiler.options.optimization.splitChunks;
                 _options.cacheGroups = this.getDynamicChunkCacheGroups(_options.cacheGroups);
-                this.options = SplitChunksPlugin.normalizeOptions(_options);
+                this.options = SplitChunksPlugin_1.default.normalizeOptions(_options);
             });
             compilation.hooks.beforeChunkIds.tap(PLUGIN_NAME, this.stableChunkId);
             const { mainTemplate } = compilation;
@@ -38,8 +43,8 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     collectDynamicModules = (modules) => {
         modules.forEach((module) => {
             const { reasons = [] } = module;
-            const moduleId = getModuleId(module);
-            const isDynamic = reasons.every((reason) => isDynamicDep(reason.dependency));
+            const moduleId = (0, helper_1.getModuleId)(module);
+            const isDynamic = reasons.every((reason) => (0, helper_1.isDynamicDep)(reason.dependency));
             if (isDynamic) {
                 this.dynamicModules.add(moduleId);
                 const filename = path.basename(moduleId).split('.')[0];
@@ -54,7 +59,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     isEntryDynamicModule = (moduleId) => {
         const reasons = this.dynamicModuleReasonMap.get(moduleId);
         return reasons.every((reason) => {
-            const reasonModuleId = getModuleId(reason.module);
+            const reasonModuleId = (0, helper_1.getModuleId)(reason.module);
             return !this.dynamicModules.has(reasonModuleId);
         });
     };
@@ -66,7 +71,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
             cacheGroups[filename] = {
                 name: chunkName,
                 test: (module) => {
-                    return getModuleId(module) === moduleId;
+                    return (0, helper_1.getModuleId)(module) === moduleId;
                 },
                 minChunks: 1,
                 priority: 10000,
@@ -95,7 +100,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
                 }
                 return info;
             }, {});
-            return Template.asString([
+            return webpack_1.Template.asString([
                 `var __dynamicChunkPublicPath__ = "${this.publicPath}";`,
                 this.entryChunkUseCache === false
                     ? ''
@@ -107,24 +112,24 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     rewriteJsonpScriptSrcFunc = (mainTemplate) => {
         mainTemplate.hooks.localVars.tap(PLUGIN_NAME, (source) => {
             const replaceRegex = /function jsonpScriptSrc\(chunkId\) \{\n(.*)\n\}/;
-            let newSource = Template.indent(['return __dynamicChunkPublicPath__ + "" + chunkId + ".js";']);
+            let newSource = webpack_1.Template.indent(['return __dynamicChunkPublicPath__ + "" + chunkId + ".js";']);
             if (typeof this.entryChunkUseCache === 'function') {
-                newSource = Template.indent([
+                newSource = webpack_1.Template.indent([
                     'var url = __dynamicChunkPublicPath__ + "" + chunkId + ".js"',
                     `var queryHandleFunc = ${this.entryChunkUseCache};`,
                     'if(__dynamicEntryChunkInfo__[chunkId]) {',
-                    Template.indent(['url = queryHandleFunc(url);']),
+                    webpack_1.Template.indent(['url = queryHandleFunc(url);']),
                     '}',
                     'return url;',
                 ]);
             }
             else if (this.entryChunkUseCache === true) {
-                newSource = Template.indent([
+                newSource = webpack_1.Template.indent([
                     'var query = __dynamicEntryChunkInfo__[chunkId] ? "?v=" + Date.now() : ""',
                     'return __dynamicChunkPublicPath__ + "" + chunkId + ".js" + query;',
                 ]);
             }
-            source = source.replace(replaceRegex, Template.asString(['var jsonpScriptSrc = function (chunkId) {', newSource, '}']));
+            source = source.replace(replaceRegex, webpack_1.Template.asString(['var jsonpScriptSrc = function (chunkId) {', newSource, '}']));
             return source;
         });
     };
@@ -132,18 +137,18 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
         mainTemplate.hooks.jsonpScript &&
             mainTemplate.hooks.jsonpScript.tap('JsonpMainTemplatePlugin', () => {
                 const { chunkLoadTimeout } = mainTemplate.outputOptions;
-                return Template.asString([
+                return webpack_1.Template.asString([
                     'var onScriptComplete;',
                     '// create error before stack unwound to get useful stacktrace later',
                     'var error = new Error();',
                     'onScriptComplete = function (event) {',
-                    Template.indent([
+                    webpack_1.Template.indent([
                         'clearTimeout(timeout);',
                         'var chunk = installedChunks[chunkId];',
                         'if(chunk !== 0) {',
-                        Template.indent([
+                        webpack_1.Template.indent([
                             'if(chunk) {',
-                            Template.indent([
+                            webpack_1.Template.indent([
                                 "var errorType = event && (event.type === 'load' ? 'missing' : event.type);",
                                 'var realSrc = event && event.target && event.target.src || chunkId;',
                                 "error.message = 'Loading chunk ' + chunkId + ' failed.\\n(' + errorType + ': ' + realSrc + ')';",
@@ -159,18 +164,18 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
                     ]),
                     '};',
                     'var timeout = setTimeout(function(){',
-                    Template.indent(["onScriptComplete({ type: 'timeout' });"]),
+                    webpack_1.Template.indent(["onScriptComplete({ type: 'timeout' });"]),
                     `}, ${chunkLoadTimeout});`,
                     'var __chunkFailCallback = function () {',
-                    Template.indent(["onScriptComplete({ type: 'request:fail' });"]),
+                    webpack_1.Template.indent(["onScriptComplete({ type: 'request:fail' });"]),
                     '};',
                     'var __chunkSuccessCallback = function (res) {',
-                    Template.indent([
+                    webpack_1.Template.indent([
                         'if (res.statusCode !== 200) {',
-                        Template.indent(['__chunkFailCallback();', 'return;']),
+                        webpack_1.Template.indent(['__chunkFailCallback();', 'return;']),
                         '}',
                         'try {',
-                        Template.indent([
+                        webpack_1.Template.indent([
                             'var rootContext = globalThis;',
                             "var interpreter = new wx['eval5'].Interpreter(rootContext, { rootContext: rootContext });",
                             'interpreter.evaluate(res.data)',
@@ -182,7 +187,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
                     '};',
                     'console.log(jsonpScriptSrc(chunkId));',
                     'wx.request({',
-                    Template.indent([
+                    webpack_1.Template.indent([
                         'url: jsonpScriptSrc(chunkId),',
                         `timeout: ${chunkLoadTimeout},`,
                         'success: __chunkSuccessCallback,',
@@ -194,21 +199,21 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     };
     rewriteRequireEnsureFunc = (mainTemplate) => {
         mainTemplate.hooks.requireEnsure.tap('JsonpMainTemplatePlugin load', (source, chunk, hash) => {
-            return Template.asString([
+            return webpack_1.Template.asString([
                 '// JSONP chunk loading for javascript',
                 '',
                 'var installedChunkData = installedChunks[chunkId];',
                 'if(installedChunkData !== 0) { // 0 means "already installed".',
-                Template.indent([
+                webpack_1.Template.indent([
                     '',
                     '// a Promise means "currently loading".',
                     'if(installedChunkData) {',
-                    Template.indent(['promises.push(installedChunkData[2]);']),
+                    webpack_1.Template.indent(['promises.push(installedChunkData[2]);']),
                     '} else {',
-                    Template.indent([
+                    webpack_1.Template.indent([
                         '// setup Promise in chunk cache',
                         'var promise = new Promise(function(resolve, reject) {',
-                        Template.indent(['installedChunkData = installedChunks[chunkId] = [resolve, reject];']),
+                        webpack_1.Template.indent(['installedChunkData = installedChunks[chunkId] = [resolve, reject];']),
                         '});',
                         'promises.push(installedChunkData[2] = promise);',
                         '',
@@ -222,3 +227,4 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
         });
     };
 }
+exports.default = MiniRemoteChunkPlugin;

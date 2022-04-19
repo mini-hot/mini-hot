@@ -1,9 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getDirectoryHash = void 0;
 const fse = require('fs-extra');
 const md5 = require('md5');
+const path = require('path');
 /**
  * 对目录内容生成hash
  */
-export function getDirectoryHash(dir, ignore) {
+function getDirectoryHash(dir, ignore) {
     if (!fse.pathExistsSync(dir)) {
         throw new Error(`${dir} 不存在`);
     }
@@ -23,9 +27,10 @@ export function getDirectoryHash(dir, ignore) {
         const dirNameHash = md5(childDirs.join(''));
         let hashArr = [];
         for (let i = 0; i < childDirs.length; i++) {
-            hashArr.push(getDirectoryHash(childDirs[i], ignore));
+            hashArr.push(getDirectoryHash(path.join(dir, childDirs[i]), ignore));
         }
         return md5(hashArr.join('') + dirNameHash);
     }
     return '';
 }
+exports.getDirectoryHash = getDirectoryHash;

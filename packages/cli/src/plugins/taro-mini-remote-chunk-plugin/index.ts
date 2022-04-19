@@ -11,7 +11,7 @@ const colors = require('colors')
 
 let isDevServerLaunch = false
 
-type PluginOptions = {
+export type PluginOptions = {
     publicPath: string
     remoteChunkOutputPath: string
     entryChunkUseCache: boolean | ((url: string) => string)
@@ -69,10 +69,12 @@ export default async (ctx: IPluginContext, pluginOpts: PluginOptions) => {
     })
 
     ctx.onBuildFinish(() => {
-        const remoteAbsolutePath = path.join(paths.outputPath, remoteChunkOutputPath)
-        const basicHash = getDirectoryHash(paths.outputPath, remoteAbsolutePath)
-        const remotehash = getDirectoryHash(remoteAbsolutePath)
-        console.log(colors.green(`\n 无法热更新内容hash ${basicHash} \n`))
-        console.log(colors.green(`\n 支持热更新内容hash ${remotehash} \n`))
+        if(!runOpts.options.isWatch) {
+            const remoteAbsolutePath = path.join(paths.outputPath, remoteChunkOutputPath)
+            const basicHash = getDirectoryHash(paths.outputPath, remoteAbsolutePath)
+            const remotehash = getDirectoryHash(remoteAbsolutePath)
+            console.log(colors.green(`\n💟 无法热更新内容hash: ${basicHash} \n`))
+            console.log(colors.green(`\n💓 支持热更新内容hash: ${remotehash} \n`))
+        }
     })
 }

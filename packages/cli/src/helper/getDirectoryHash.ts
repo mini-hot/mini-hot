@@ -1,5 +1,6 @@
 const fse = require('fs-extra')
 const md5 = require('md5')
+const path = require('path')
 
 /**
  * 对目录内容生成hash
@@ -22,7 +23,7 @@ export function getDirectoryHash(dir, ignore?: string | RegExp | ((filePath: str
         const dirNameHash = md5(childDirs.join(''))
         let hashArr: string[] = []
         for (let i = 0; i < childDirs.length; i++) {
-            hashArr.push(getDirectoryHash(childDirs[i], ignore))
+            hashArr.push(getDirectoryHash(path.join(dir, childDirs[i]), ignore))
         }
         return md5(hashArr.join('') + dirNameHash)
     }
