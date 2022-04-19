@@ -29,8 +29,8 @@
 	"devDependencies": {
 		"@tarojs/service": "^3.4.6",
 		"@types/node": "^17.0.24",
-		"webpack": "4.46.0",
-		"rimraf": "^3.0.2"
+		"rimraf": "^3.0.2",
+		"webpack": "4.46.0"
 	},
 	"dependencies": {
 		"colors": "^1.4.0",
