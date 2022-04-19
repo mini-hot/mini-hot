@@ -1,6 +1,6 @@
+import { getDirectoryHash } from './getDirectoryHash'
 const path = require('path')
 const colors = require('colors')
-const getDirectoryHash = require('./getDirectoryHash')
 
 export function logAssetsHash(outputPath, hotUpdateAssetsOutputPath) {
     const remoteAbsolutePath = path.join(outputPath, hotUpdateAssetsOutputPath)
