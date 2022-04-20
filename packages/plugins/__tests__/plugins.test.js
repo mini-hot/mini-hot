@@ -2,7 +2,7 @@
 
 // const cli = require('..');
 
-describe('@mini-hot/cli', () => {
+describe('@mini-hot/plugins', () => {
     // it('needs tests');
     test('todo', () => {
 
