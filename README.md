@@ -1,6 +1,6 @@
 # mini-hot
 
-开发中，敬请期待。⚠️ 功能还未能使用，文档只是对未来 API 的描述
+[Demo 工程](https://github.com/mini-hot/mini-hot-demo)
 
 ## API
 
