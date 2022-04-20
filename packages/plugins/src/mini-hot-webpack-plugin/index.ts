@@ -1,6 +1,6 @@
 import SplitChunksPlugin from 'webpack/lib/optimize/SplitChunksPlugin'
 import { Template } from 'webpack'
-import { isDynamicDep, getModuleId, normalizePublicPath } from './helper'
+import { isDynamicDep, getModuleId, normalizePublicPath, normalizeHotUpdateAssetsOutputPath } from './helper'
 
 const path = require('path')
 
@@ -23,7 +23,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     constructor(o) {
         super(o)
         this.publicPath = normalizePublicPath(o.publicPath)
-        this.hotUpdateAssetsOutputPath = normalizePublicPath(o.hotUpdateAssetsOutputPath)
+        this.hotUpdateAssetsOutputPath = normalizeHotUpdateAssetsOutputPath(o.hotUpdateAssetsOutputPath)
         this.entryChunkUseCache = o.entryChunkUseCache
     }
 
@@ -116,7 +116,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
             )
             return Template.asString([
                 `var __dynamicChunkPublicPath__ = "${this.publicPath}";`,
-                this.entryChunkUseCache === false
+                this.entryChunkUseCache === true
                     ? ''
                     : `var __dynamicEntryChunkInfo__ = ${JSON.stringify(__dynamicEntryChunkInfo__)}`,
                 source,
@@ -137,7 +137,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
                     '}',
                     'return url;',
                 ])
-            } else if (this.entryChunkUseCache === true) {
+            } else if (this.entryChunkUseCache === false) {
                 newSource = Template.indent([
                     'var query = __dynamicEntryChunkInfo__[chunkId] ? "?v=" + Date.now() : ""',
                     'return __dynamicChunkPublicPath__ + "" + chunkId + ".js" + query;',
