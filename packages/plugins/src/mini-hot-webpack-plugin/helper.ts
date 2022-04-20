@@ -9,7 +9,10 @@ export function getModuleId(module) {
     return module.userRequest || module._identifier
 }
 
-export function normalizePublicPath(url) {
-    if (url[url.length - 1] !== '/') return url
-    return url.slice(0, -1)
+export function normalizePublicPath(str) {
+    return str.replace(/[\/]+$/, '') 
+}
+
+export function normalizeHotUpdateAssetsOutputPath(str) {
+    return '/' + str.replace(/^[\/]+/, '')
 }

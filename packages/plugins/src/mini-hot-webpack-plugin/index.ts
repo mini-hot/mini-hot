@@ -1,6 +1,6 @@
 import SplitChunksPlugin from 'webpack/lib/optimize/SplitChunksPlugin'
 import { Template } from 'webpack'
-import { isDynamicDep, getModuleId, normalizePublicPath } from './helper'
+import { isDynamicDep, getModuleId, normalizePublicPath, normalizeHotUpdateAssetsOutputPath } from './helper'
 
 const path = require('path')
 
@@ -23,7 +23,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     constructor(o) {
         super(o)
         this.publicPath = normalizePublicPath(o.publicPath)
-        this.hotUpdateAssetsOutputPath = normalizePublicPath(o.hotUpdateAssetsOutputPath)
+        this.hotUpdateAssetsOutputPath = normalizeHotUpdateAssetsOutputPath(o.hotUpdateAssetsOutputPath)
         this.entryChunkUseCache = o.entryChunkUseCache
     }
 
