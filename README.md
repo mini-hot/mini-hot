@@ -7,11 +7,18 @@
 ### `createRemotePage` - 单个页面远程加载
 
 ```ts
+// SomePage.ts
 import { createRemotePage } from '@mini-hot/taro'
 export default createRemotePage(() => import('./SomePage'))
 ```
 
 ### `createRemoteApp` - 小程序 SPA 化后远程加载
+
+```ts
+// SPA.ts
+import { createRemoteApp } from '@mini-hot/taro'
+export default createRemoteApp(() => import('./routes'))
+```
 
 ```ts
 // routes.ts
@@ -29,11 +36,6 @@ export default createRemoteAppRoutes([
         getPage: () => import('./PageB'),
     },
 ])
-```
-
-```ts
-import { createRemoteApp } from '@mini-hot/taro'
-export default createRemoteApp(() => import('./routes'))
 ```
 
 ## 相关
