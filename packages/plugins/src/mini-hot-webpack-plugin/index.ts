@@ -50,7 +50,11 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
         modules.forEach((module) => {
             const { reasons = [] } = module
             const moduleId = getModuleId(module)
-            const isDynamic = reasons.every((reason) => isDynamicDep(reason.dependency))
+            const isDynamic = reasons.every(
+                (reason) =>
+                    isDynamicDep(reason.dependency) ||
+                    (reason.module && this.dynamicModules.has(getModuleId(reason.module)))
+            )
             if (isDynamic) {
                 this.dynamicModules.add(moduleId)
                 const filename = path.basename(moduleId).split('.')[0]
