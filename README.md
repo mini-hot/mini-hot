@@ -1,5 +1,7 @@
 # mini-hot
 
+<a href="https://www.npmjs.com/package/react-interpreter"><img src="https://img.shields.io/npm/v/react-interpreter.svg?style=flat-square&colorB=51C838" alt="NPM Version"></a>
+
 [Demo 工程](https://github.com/mini-hot/mini-hot-demo)
 
 ## API
@@ -27,7 +29,7 @@ import { createRemoteAppRoutes } from '@mini-hot/taro'
 export default createRemoteAppRoutes([
     {
         path: '/PageA/:code',
-        // PageA 不继续分块 
+        // PageA 不继续分块
         getPage: async () => require('./PageA'),
     },
     {
