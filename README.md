@@ -1,6 +1,6 @@
 # mini-hot
 
-<a href="https://www.npmjs.com/package/react-interpreter"><img src="https://img.shields.io/npm/v/react-interpreter.svg?style=flat-square&colorB=51C838" alt="NPM Version"></a>
+<a href="https://www.npmjs.com/package/@mini-hot/taro"><img src="https://img.shields.io/npm/v/@mini-hot/taro.svg?style=flat-square&colorB=51C838" alt="NPM Version"></a>
 
 [Demo 工程](https://github.com/mini-hot/mini-hot-demo)
 
