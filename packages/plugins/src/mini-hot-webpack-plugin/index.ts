@@ -51,31 +51,44 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
             const { reasons = [] } = module
             const moduleId = getModuleId(module)
             const isDynamic = reasons.every((reason) => {
-                return isDynamicDep(reason.dependency) ||
-                (reason.module && this.dynamicModuleEntryMap.has(getModuleId(reason.module)))
+                return (
+                    isDynamicDep(reason.dependency) ||
+                    (reason.module && this.dynamicModuleEntryMap.has(getModuleId(reason.module)))
+                )
             })
             if (!isDynamic) return
+            let isAllDynamic = true
+            let dynamicReasonsQueue = new Set()
 
             reasons.forEach((reason) => {
-                if (isDynamicDep(reason.dependency)) {
-                    this.dynamicModuleTree[moduleId] = {
-                        dependencies: [],
-                        isEntry: reason.module && this.dynamicModuleEntryMap.has(getModuleId(reason.module))
-                    }
-                    this.dynamicModuleEntryMap.set(moduleId, moduleId)
-                } else if (reason.module) {
-                    const reasonModuleId = getModuleId(reason.module)
-                    if (this.dynamicModuleEntryMap.has(reasonModuleId)) {
-                        const entryModuleId = this.dynamicModuleEntryMap.get(reasonModuleId)
+                if (!isDynamicDep(reason.dependency)) {
+                    isAllDynamic = false
+                }
+                if (reason.module && this.dynamicModuleEntryMap.has(getModuleId(reason.module))) {
+                    dynamicReasonsQueue.add(getModuleId(reason.module))
+                }
+            })
+
+            if (isAllDynamic || dynamicReasonsQueue.size >= 2) {
+                this.dynamicModuleTree[moduleId] = {
+                    dependencies: [],
+                    isEntry: isAllDynamic && dynamicReasonsQueue.size === 0,
+                }
+                this.dynamicModuleEntryMap.set(moduleId, moduleId)
+            } else {
+                reasons.forEach((reason) => {
+                    if (reason.module && this.dynamicModuleEntryMap.has(getModuleId(reason.module))) {
+                        const entryModuleId = this.dynamicModuleEntryMap.get(getModuleId(reason.module))
                         this.dynamicModuleTree[entryModuleId].dependencies.push(moduleId)
                         this.dynamicModuleEntryMap.set(moduleId, entryModuleId)
                     }
-                }
-                const filename = path.basename(moduleId).split('.')[0]
-                this.moduleBuildInfoMap.set(moduleId, {
-                    hash: module._buildHash,
-                    filename,
                 })
+            }
+
+            const filename = path.basename(moduleId).split('.')[0]
+            this.moduleBuildInfoMap.set(moduleId, {
+                hash: module._buildHash,
+                filename,
             })
         })
     }
@@ -93,7 +106,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
                 name: chunkName,
                 test: (module) => {
                     const id = getModuleId(module)
-                    return id === moduleId || this.dynamicModuleTree[moduleId].includes(id)
+                    return id === moduleId || this.dynamicModuleTree[moduleId].dependencies.includes(id)
                 },
                 minChunks: 1,
                 priority: 10000,
@@ -118,14 +131,13 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
 
     injectVar = (mainTemplate) => {
         mainTemplate.hooks.requireExtensions.tap(PLUGIN_NAME, (source) => {
-            const __dynamicEntryChunkInfo__ = Object.keys(this.dynamicModuleTree).reduce(
-                (info: { [k in string]: boolean }, moduleId) => {
+            const __dynamicEntryChunkInfo__ = Object.keys(this.dynamicModuleTree)
+                .filter((moduleId) => this.dynamicModuleTree[moduleId].isEntry)
+                .reduce((info: { [k in string]: boolean }, moduleId) => {
                     const chunkName = this.getChunkName(moduleId)
                     info[chunkName] = true
                     return info
-                },
-                {}
-            )
+                }, {})
             return Template.asString([
                 `var __dynamicChunkPublicPath__ = "${this.publicPath}";`,
                 this.entryChunkUseCache === true
