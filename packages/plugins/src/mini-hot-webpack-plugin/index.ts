@@ -11,9 +11,9 @@ type CacheGroups = {
 }
 
 export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
-    dynamicModules = new Set()
+    dynamicModuleTree = {}
+    dynamicModuleEntryMap = new Map()
     moduleBuildInfoMap = new Map()
-    dynamicModuleReasonMap = new Map()
     splitChunkNames: string[] = []
     options = null
     publicPath = ''
@@ -50,40 +50,50 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
         modules.forEach((module) => {
             const { reasons = [] } = module
             const moduleId = getModuleId(module)
-            const isDynamic = reasons.every(
-                (reason) =>
-                    isDynamicDep(reason.dependency) ||
-                    (reason.module && this.dynamicModules.has(getModuleId(reason.module)))
-            )
-            if (isDynamic) {
-                this.dynamicModules.add(moduleId)
+            const isDynamic = reasons.every((reason) => {
+                return isDynamicDep(reason.dependency) ||
+                (reason.module && this.dynamicModuleEntryMap.has(getModuleId(reason.module)))
+            })
+            if (!isDynamic) return
+
+            reasons.forEach((reason) => {
+                if (isDynamicDep(reason.dependency)) {
+                    this.dynamicModuleTree[moduleId] = {
+                        dependencies: [],
+                        isEntry: reason.module && this.dynamicModuleEntryMap.has(getModuleId(reason.module))
+                    }
+                    this.dynamicModuleEntryMap.set(moduleId, moduleId)
+                } else if (reason.module) {
+                    const reasonModuleId = getModuleId(reason.module)
+                    if (this.dynamicModuleEntryMap.has(reasonModuleId)) {
+                        const entryModuleId = this.dynamicModuleEntryMap.get(reasonModuleId)
+                        this.dynamicModuleTree[entryModuleId].dependencies.push(moduleId)
+                        this.dynamicModuleEntryMap.set(moduleId, entryModuleId)
+                    }
+                }
                 const filename = path.basename(moduleId).split('.')[0]
                 this.moduleBuildInfoMap.set(moduleId, {
                     hash: module._buildHash,
                     filename,
                 })
-                this.dynamicModuleReasonMap.set(moduleId, reasons)
-            }
+            })
         })
     }
 
     isEntryDynamicModule = (moduleId) => {
-        const reasons = this.dynamicModuleReasonMap.get(moduleId)
-        return reasons.every((reason) => {
-            const reasonModuleId = getModuleId(reason.module)
-            return !this.dynamicModules.has(reasonModuleId)
-        })
+        return Object.keys(this.dynamicModuleTree).includes(moduleId)
     }
 
     getDynamicChunkCacheGroups = (initialCacheGroups: CacheGroups = {}) => {
-        return Array.from(this.dynamicModules).reduce((cacheGroups: CacheGroups, moduleId) => {
+        return Object.keys(this.dynamicModuleTree).reduce((cacheGroups: CacheGroups, moduleId) => {
             const { filename } = this.moduleBuildInfoMap.get(moduleId)
             const chunkName = this.getChunkName(moduleId)
             this.splitChunkNames.push(chunkName)
             cacheGroups[filename] = {
                 name: chunkName,
                 test: (module) => {
-                    return getModuleId(module) === moduleId
+                    const id = getModuleId(module)
+                    return id === moduleId || this.dynamicModuleTree[moduleId].includes(id)
                 },
                 minChunks: 1,
                 priority: 10000,
@@ -108,12 +118,10 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
 
     injectVar = (mainTemplate) => {
         mainTemplate.hooks.requireExtensions.tap(PLUGIN_NAME, (source) => {
-            const __dynamicEntryChunkInfo__ = Array.from(this.dynamicModules).reduce(
+            const __dynamicEntryChunkInfo__ = Object.keys(this.dynamicModuleTree).reduce(
                 (info: { [k in string]: boolean }, moduleId) => {
-                    if (this.isEntryDynamicModule(moduleId)) {
-                        const chunkName = this.getChunkName(moduleId)
-                        info[chunkName] = true
-                    }
+                    const chunkName = this.getChunkName(moduleId)
+                    info[chunkName] = true
                     return info
                 },
                 {}
