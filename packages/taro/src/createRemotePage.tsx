@@ -8,19 +8,19 @@ type CreateRemotePageOptions = {
     onFinish?: () => void
     onLoading?: () => ElementType
     onError?: (reload: () => void) => ElementType
-    preFetch?: boolean
+    prefetch?: boolean
     timeout?: number
 }
 
 export function createRemotePage(getPage: () => Promise<{ default: ElementType }>, options?: CreateRemotePageOptions) {
     const opts: CreateRemotePageOptions = {
-        preFetch: true,
+        prefetch: true,
         ...options,
     }
 
     let getPagePromise: (Promise<{ default: ElementType }> & QueryableProps) | undefined = undefined
 
-    if (opts.preFetch) {
+    if (opts.prefetch) {
         getPagePromise = createPromise(getPage(), opts.timeout)
     }
 

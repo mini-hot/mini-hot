@@ -1,6 +1,6 @@
 {
 	"name": "@mini-hot/plugins",
-	"version": "0.0.0",
+	"version": "0.2.2",
 	"description": "> TODO: description",
 	"author": "wuchangming <wuchangmingnice@163.com>",
 	"homepage": "https://github.com/mini-hot/mini-hot/tree/main/packages/cli#readme",
@@ -39,5 +39,6 @@
 		"get-port": "5.1.1",
 		"md5": "^2.3.0",
 		"serve-static": "^1.15.0"
-	}
+	},
+	"gitHead": "67c635e045d54e1668a371f82fd878fd6d26b645"
 }

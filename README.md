@@ -1,17 +1,26 @@
 # mini-hot
 
-开发中，敬请期待。⚠️ 功能还未能使用，文档只是对未来 API 的描述
+<a href="https://www.npmjs.com/package/@mini-hot/taro"><img src="https://img.shields.io/npm/v/@mini-hot/taro.svg?style=flat-square&colorB=51C838" alt="NPM Version"></a>
+
+[Demo 工程](https://github.com/mini-hot/mini-hot-demo)
 
 ## API
 
 ### `createRemotePage` - 单个页面远程加载
 
 ```ts
+// SomePage.ts
 import { createRemotePage } from '@mini-hot/taro'
 export default createRemotePage(() => import('./SomePage'))
 ```
 
 ### `createRemoteApp` - 小程序 SPA 化后远程加载
+
+```ts
+// SPA.ts
+import { createRemoteApp } from '@mini-hot/taro'
+export default createRemoteApp(() => import('./routes'))
+```
 
 ```ts
 // routes.ts
@@ -29,11 +38,6 @@ export default createRemoteAppRoutes([
         getPage: () => import('./PageB'),
     },
 ])
-```
-
-```ts
-import { createRemoteApp } from '@mini-hot/taro'
-export default createRemoteApp(() => import('./routes'))
 ```
 
 ## 相关

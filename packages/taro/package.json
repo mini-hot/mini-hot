@@ -1,6 +1,6 @@
 {
   "name": "@mini-hot/taro",
-  "version": "0.1.1-beta.0",
+  "version": "0.2.2",
   "description": "> TODO: description",
   "author": "wuchangming <wuchangmingnice@163.com>",
   "homepage": "https://github.com/mini-hot/mini-hot/tree/main/packages/taro#readme",
@@ -53,5 +53,5 @@
     "@tarojs/taro": "3.x",
     "react": "*"
   },
-  "gitHead": "a40ad7c59db5daf69057782c2be5636aa20980e7"
+  "gitHead": "67c635e045d54e1668a371f82fd878fd6d26b645"
 }

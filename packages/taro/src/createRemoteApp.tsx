@@ -14,7 +14,7 @@ type createRemoteAppOptions = {
     onLoading?: () => ElementType
     onError?: (reload: () => void) => ElementType
     onNotFound?: () => ElementType
-    preFetch?: boolean
+    prefetch?: boolean
     timeout?: number
     routePathKey?: string
 }
@@ -24,13 +24,13 @@ export function createRemoteApp(
     options?: createRemoteAppOptions
 ) {
     const opts: createRemoteAppOptions = {
-        preFetch: true,
+        prefetch: true,
         ...options,
     }
 
     let getRoutesPromise: (Promise<{ default: RemotePageRoute[] }> & QueryableProps) | undefined = undefined
 
-    if (opts.preFetch) {
+    if (opts.prefetch) {
         getRoutesPromise = createPromise(getRoutes(), opts.timeout)
     }
 
