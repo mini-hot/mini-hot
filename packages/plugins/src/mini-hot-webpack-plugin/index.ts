@@ -19,6 +19,7 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
     publicPath = ''
     hotUpdateAssetsOutputPath = ''
     entryChunkUseCache = false
+    initialCacheGroups = null
 
     constructor(o) {
         super(o)
@@ -33,7 +34,10 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
             compilation.hooks.finishModules.tap(PLUGIN_NAME, this.collectDynamicModules)
             compilation.hooks.optimizeChunks.tap(PLUGIN_NAME, (chunks) => {
                 let _options = compiler.options.optimization.splitChunks
-                _options.cacheGroups = this.getDynamicChunkCacheGroups(_options.cacheGroups)
+                if (!this.initialCacheGroups) {
+                    this.initialCacheGroups = _options.cacheGroups
+                }
+                _options.cacheGroups = this.getDynamicChunkCacheGroups({ ...(this.initialCacheGroups as any) })
                 this.options = SplitChunksPlugin.normalizeOptions(_options)
             })
             compilation.hooks.beforeChunkIds.tap(PLUGIN_NAME, this.stableChunkId)
@@ -56,7 +60,21 @@ export default class MiniRemoteChunkPlugin extends SplitChunksPlugin {
                     (reason.module && this.dynamicModuleEntryMap.has(getModuleId(reason.module)))
                 )
             })
-            if (!isDynamic) return
+            if (!isDynamic) {
+                if (this.dynamicModuleEntryMap.has(moduleId)) {
+                    const entryModuleId = this.dynamicModuleEntryMap.get(moduleId)
+                    this.dynamicModuleEntryMap.delete(moduleId)
+                    const index = this.dynamicModuleTree[entryModuleId].indexOf(moduleId)
+                    if (this.dynamicModuleTree[moduleId]) {
+                        delete this.dynamicModuleTree[moduleId]
+                    } else {
+                        if (index > -1) {
+                            this.dynamicModuleTree[entryModuleId].splice(index, 1)
+                        }
+                    }
+                }
+                return
+            }
             let isAllDynamic = true
             let dynamicReasonsQueue = new Set()
 
