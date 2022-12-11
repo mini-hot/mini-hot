@@ -1,4 +1,5 @@
 # mini-hot
+**⚠️注意：该方案使用的开源库已被[微信官方禁用](https://developers.weixin.qq.com/community/develop/doc/0000ae500e4fd0541f2ea33755b801?highLine=%25E8%25A7%25A3%25E9%2587%258A%25E5%2599%25A8%25E4%25BD%25BF%25E7%2594%25A8%25E8%25A7%2584%25E8%258C%2583)，谨慎使用！**
 
 <a href="https://www.npmjs.com/package/@mini-hot/taro"><img src="https://img.shields.io/npm/v/@mini-hot/taro.svg?style=flat-square&colorB=51C838" alt="NPM Version"></a>
 
